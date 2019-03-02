@@ -1,0 +1,3 @@
+This archive contains a static binary of ffmpeg.
+The licenses for ffmpeg and it's dependant libraries are in the licenses folder.
+It is statically linked using the MIT licensed musl libc which you can find more information over at https://www.musl-libc.org/
