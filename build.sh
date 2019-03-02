@@ -32,7 +32,7 @@ fi
 
 if [ ! -f sources/${TARGET_TRIPLE}-cross.tgz ]; then 
 	echo "Downloading toolchain."
-	wget "http://namedkitten.pw/${TARGET_TRIPLE}-cross.tgz" -O "sources/${TARGET_TRIPLE}-cross.tgz"
+	wget "http://musl.cc/{TARGET_TRIPLE}-cross.tgz" -O "sources/${TARGET_TRIPLE}-cross.tgz"
 fi
 
 if [ ! -d toolchain ]; then 
