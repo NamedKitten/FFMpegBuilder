@@ -3,13 +3,14 @@ TARGET_ARCH=x86_64
 TARGET_TRIPLE=${TARGET_ARCH}-linux-musl
 
 # Compilation flags
-CFLAGS="-Os -pipe"
+CFLAGS="-Ofast -pipe -march=native -DFLOAT_APPROX"
 CXXFLAGS=${CFLAGS}
 LDFLAGS=${CFLAGS}
 
 # Audio
 CONF_OPUS=true
 CONF_AAC=true
+CONF_FDK_AAC=false # Is nonfree. Will make binarys non-redistributable.
 CONF_FLAC=true
 CONF_MP3=true
 CONF_OGG=true
@@ -18,7 +19,7 @@ CONF_VORBIS=true # Requires OGG
 # Video
 CONF_PNG=true # Needed for album art sometimes.
 CONF_MJPEG=true # Needed for album art sometimes.
-CONF_X264=true
+CONF_X264=true # Will make resulting binarys GPL licensed.
 CONF_VPX=true
 
 # Formats

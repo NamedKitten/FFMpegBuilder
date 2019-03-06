@@ -1,3 +1,7 @@
 This archive contains a static binary of ffmpeg.
 The licenses for ffmpeg and it's dependant libraries are in the licenses folder.
 It is statically linked using the MIT licensed musl libc which you can find more information over at https://www.musl-libc.org/
+
+The FFMpeg binary uses the LICENSE_NAME license.
+
+IF_NONFREE This FFMpeg binary is a nonfree license, if you didn't compile this yourself then remove the binaries and build it yourself as it is against the GPL to distrubute prebuilt binaries when linked with a non-GPL compatable license library.

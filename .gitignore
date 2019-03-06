@@ -1,4 +1,7 @@
 toolchain
 sources
 output
-
+logs
+logs/*
+*.log
+.log
