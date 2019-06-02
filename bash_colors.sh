@@ -3,6 +3,8 @@
 # Constants and functions for terminal colors.
 # Author: Max Tsepkov <max@yogi.pw>
 
+set +x
+
 CLR_ESC="\033["
 
 # All these variables has a function with the same name, but in lower case.
@@ -175,3 +177,4 @@ function clr_dump
 '
 }
 
+set +x
