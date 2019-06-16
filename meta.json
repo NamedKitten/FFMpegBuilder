@@ -340,6 +340,20 @@
         "type": "tarball",
         "url": "https://www.x.org/pub/individual/lib/libXvMC-1.0.10.tar.bz2"
     },
+    "libXxf86dga": {
+        "version": "1.1.5",
+        "folder": "libXxf86dga-1.1.5",
+        "filename": "libXxf86dga-1.1.5.tar.bz2",
+        "type": "tarball",
+        "url": "https://www.x.org/pub/individual/lib/libXxf86dga-1.1.5.tar.bz2"
+    },
+    "libXxf86vm": {
+        "version": "1.1.4",
+        "folder": "libXxf86vm-1.1.4",
+        "filename": "libXxf86vm-1.1.4.tar.bz2",
+        "type": "tarball",
+        "url": "https://www.x.org/pub/individual/lib/libXxf86vm-1.1.4.tar.bz2"
+    },
     "libdmx": {
         "version": "libdmx",
         "folder": "libdmx-1.1.4",
@@ -446,5 +460,26 @@
         "filename": "SDL2-2.0.9.tar.gz",
         "type": "tarball",
         "url": "https://libsdl.org/release/SDL2-2.0.9.tar.gz"
+    },
+    "mesa": {
+        "version": "18.3.6",
+        "folder": "mesa-18.3.6",
+        "filename": "mesa-18.3.6.tar.xz",
+        "type": "tarball",
+        "url": "https://mesa.freedesktop.org/archive/mesa-18.3.6.tar.xz"
+    },
+    "libdrm": {
+        "version": "2.4.98",
+        "folder": "libdrm-2.4.98",
+        "filename": "libdrm-2.4.98.tar.bz2",
+        "type": "tarball",
+        "url": "https://dri.freedesktop.org/libdrm/libdrm-2.4.98.tar.bz2"
+    },
+    "ffmpegthumbnailer": {
+        "version": ",master",
+        "folder": "ffmpegthumbnailer",
+        "type": "git",
+        "url": "https://github.com/dirkvdb/ffmpegthumbnailer",
+        "licenseFilepath": "COPYING"
     }
 }
