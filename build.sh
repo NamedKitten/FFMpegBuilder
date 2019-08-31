@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-#set -x
+set -x
 set -o pipefail
 
 # For coloured text.
@@ -15,10 +15,23 @@ ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd $ROOT_DIR
 
+export OLDPATH=$PATH
+
+
+export HOST_CC=/usr/bin/gcc
+export HOST_LD=/usr/bin/gcc
+export HOST_CXX=/usr/bin/g++
+export HOST_AR=/usr/bin/ar
+export HOST_NM=/usr/bin/nm
+export HOST_RANLIB=/usr/bin/ranlib
+
+export STATE_DIR=${ROOT_DIR}/state
 export SOURCES_DIR=${ROOT_DIR}/sources
 export OUTPUT_DIR=${ROOT_DIR}/output
 export LOGS_DIR=${ROOT_DIR}/logs
 export SYSROOT=${ROOT_DIR}/toolchain
+
+export OLDPATH=$PATH
 export PATH=${SYSROOT}/bin:$PATH
 
 source config.sh
@@ -31,9 +44,9 @@ export CXXFLAGS="$CXXFLAGS"
 export CC="/usr/bin/ccache ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc"
 export CXX="/usr/bin/ccache ${SYSROOT}/bin/${TARGET_TRIPLE}-g++"
 export LD="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc"
-export NM="${SYSROOT}/bin/${TARGET_TRIPLE}-nm"
-export RANLIB="${SYSROOT}/bin/${TARGET_TRIPLE}-ranlib"
-export AR="${SYSROOT}/bin/${TARGET_TRIPLE}-ar"
+export NM="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-nm"
+export RANLIB="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ranlib"
+export AR="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ar"
 export ARCH=`echo ${TARGET_TRIPLE} | sed s/.*-//`
 export CROSS_COMPILE=${TARGET_TRIPLE}-
 
@@ -53,34 +66,72 @@ if $CONF_FFPROBE; then
 fi
 
 clr_blue "Making dirs"
-mkdir -p logs output output/licenses sources logs
+mkdir -p logs output output/licenses sources logs state
+
+CURRENT_ARCH=$(gcc -dumpmachine | sed s/-*//)
+
+TOOLCHAIN_TYPE=cross
+
+if [ $CURRENT_ARCH != "x86_64" ]; then
+    if [ $TARGET_ARCH != $CURRENT_ARCH ]; then 
+        TOOLCHAIN_TYPE=native
+    else
+        echo "no"
+        exit
+    fi
 
 
-if [ ! -f sources/${TARGET_TRIPLE}-cross.tgz ]; then
+fi
+
+
+if [ ! -f sources/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz ]; then
     clr_brown "Downloading toolchain"
-    wget -q "http://musl.cc/${TARGET_TRIPLE}-cross.tgz" -O "sources/${TARGET_TRIPLE}-cross.tgz"
+    pushd sources
+    downloadURL "http://musl.cc/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz"
+    popd
 fi
 
 if [ ! -d toolchain ]; then
     clr_brown "Extracting toolchain"
     mkdir toolchain
-    tar xf "sources/${TARGET_TRIPLE}-cross.tgz" -C toolchain/ --strip-components=2  &>/dev/null
+    tar xf "sources/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz" -C toolchain/ --strip-components=2  &>/dev/null
 fi
 
-mkdir -p ${SYSROOT}/installed
+ln -sf ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ar ${SYSROOT}/bin/${TARGET_TRIPLE}-ar
+ln -sf ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-nm ${SYSROOT}/bin/${TARGET_TRIPLE}-nm
+ln -sf ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ranlib ${SYSROOT}/bin/${TARGET_TRIPLE}-ranlib
+ln -sf ${SYSROOT}/bin/strip ${SYSROOT}/bin/${TARGET_TRIPLE}-strip
+mkdir -p ${STATE_DIR}/installed
+mkdir -p ${STATE_DIR}/configured
 
 function markInstalled() {
     thing=$1
-    touch ${SYSROOT}/installed/$thing
+    touch ${STATE_DIR}/installed/$thing
 }
 
 function isInstalled() {
     thing=$1
-    [ -f "${SYSROOT}/installed/${thing}" ]
+    [ -f "${STATE_DIR}/installed/${thing}" ]
 }
 
 
-CC=gcc CXX=g++ LD=gcc buildThing pkgconf "--prefix=${SYSROOT} --enable-static --disable-shared"
+function markConfigured() {
+    thing=$1
+    touch ${STATE_DIR}/configured/$thing
+}
+
+function unmarkConfigured() {
+    thing=$1
+    rm -f ${STATE_DIR}/configured/$thing
+}
+
+function isConfigured() {
+    thing=$1
+    [ -f "${STATE_DIR}/configured/${thing}" ]
+}
+
+
+CC="$HOST_CC" CXX="$HOST_CXX" LD="$HOST_LD" AR=$HOST_AR RANLIB=$HOST_RANLIB PATH=$OLDPATH LDFLAGS="" CFLAGS="" CXXFLAGS="" CPPFLAGS="" buildThing pkgconf "--prefix=${SYSROOT} --enable-static --disable-shared"
 if [ ! -f toolchain/bin/${TARGET_TRIPLE}-pkgconf ]; then
     ln -sf ${SYSROOT}/bin/pkgconf ${SYSROOT}/bin/${TARGET_TRIPLE}-pkgconf
     ln -sf ${SYSROOT}/bin/pkgconf ${SYSROOT}/bin/${TARGET_TRIPLE}-pkg-config

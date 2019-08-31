@@ -1,0 +1,7 @@
+{
+  "version": "5.2.4",
+  "folder": "lua-5.2.4",
+  "filename": "lua-5.2.4.tar.gz",
+  "type": "tarball",
+  "url": "https://www.lua.org/ftp/lua-5.2.4.tar.gz"
+}

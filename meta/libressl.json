@@ -1,0 +1,7 @@
+{
+  "version": "2.9.1",
+  "folder": "libressl-2.9.1",
+  "filename": "libressl-2.9.1.tar.gz",
+  "type": "tarball",
+  "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.9.1.tar.gz"
+}

@@ -1,0 +1,8 @@
+{
+  "version": "master",
+  "folder": "fdk-aac",
+  "filename": "",
+  "type": "git",
+  "url": "https://github.com/mstorsjo/fdk-aac.git",
+  "licenseFilepath": "NOTICE"
+}

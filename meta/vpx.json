@@ -1,0 +1,8 @@
+{
+  "version": "v1.7.0",
+  "folder": "libvpx",
+  "filename": "",
+  "type": "git",
+  "url": "https://chromium.googlesource.com/webm/libvpx",
+  "licenseFilepath": "LICENSE"
+}

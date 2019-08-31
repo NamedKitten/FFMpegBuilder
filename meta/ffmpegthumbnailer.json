@@ -1,0 +1,7 @@
+{
+  "version": "master",
+  "folder": "ffmpegthumbnailer",
+  "type": "git",
+  "url": "https://github.com/dirkvdb/ffmpegthumbnailer",
+  "licenseFilepath": "COPYING"
+}

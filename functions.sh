@@ -2,7 +2,7 @@ function log() {
     thing=$1
     stage=$2
     
-    if $DEBUG; then
+    if [ "$DEBUG" == "true" ]; then
         cat | tee ${LOGS_DIR}/${thing}-${stage}.log
     else
         cat > ${LOGS_DIR}/${thing}-${stage}.log
@@ -11,6 +11,7 @@ function log() {
 }
 
 function failed() {
+    unmarkConfigured ${CURRENT_THING}
     clr_red "${CURRENT_THING} failed to build."
 }
 
@@ -59,7 +60,10 @@ function buildThing() {
             cp ${ROOT_DIR}/files/zlib.pc .
         ;;
         mpv )
+            git reset --hard
             sed "s/'x11', 'libdl', 'pthreads'/'x11', 'pthreads'/" -i wscript
+            #sed "s/int x[LIBAVCODEC_VERSION_MICRO >= 100 ? -1 : 1]/return 1;/" -i wscript
+            #sed "s/56.27.100/56.22.100/" -i wscript
         ;;
         ffmpegthumbnailer )
             cp ${ROOT_DIR}/files/ffmpegthumbnailer-CMakeLists.txt CMakeLists.txt
@@ -80,6 +84,7 @@ function buildThing() {
         ;;
     esac
     
+    if ! isConfigured $thing; then
     clr_blue "Configuring $thing"
     case $thing in
         berkeleydb )
@@ -104,22 +109,24 @@ function buildThing() {
             ./configure ${configureArgs[@]} |& log $thing configure
         ;;
     esac
+    fi
+    markConfigured $thing
     
     clr_blue "Building $thing"
     case $thing in
         lua )
-            make -j12 V=1 generic CC=${TARGET_TRIPLE}-gcc AR="${TARGET_TRIPLE}-ar rcu" RANLIB=${TARGET_TRIPLE}-ranlib  |& log $thing build
+            make $MAKEFLAGS V=1 generic CC=${TARGET_TRIPLE}-gcc AR="${TARGET_TRIPLE}-gcc-ar rcu" RANLIB=${TARGET_TRIPLE}-ranlib  |& log $thing build
         ;;
         mpv )
-            if [ ! -f ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so ]; then
-                mv ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so.bak ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so
+            if [ ! -f ${SYSROOT}/lib/libc.so ]; then
+                mv ${SYSROOT}/lib/libc.so.bak ${SYSROOT}/lib/libc.so
             fi
-            mv ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so.bak
-            ./waf build -j12 V=1 |& log $thing build
-            mv ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so.bak ${SYSROOT}/${TARGET_TRIPLE}/lib/libc.so
+            mv ${SYSROOT}/lib/libc.so ${SYSROOT}/lib/libc.so.bak
+            ./waf build $MAKEFLAGS V=1 |& log $thing build
+            mv ${SYSROOT}/lib/libc.so.bak ${SYSROOT}/lib/libc.so
         ;;
         * )
-            make -j12 V=1 |& log $thing build
+            make $MAKEFLAGS V=1 |& log $thing build
         ;;
     esac
     
@@ -228,43 +235,68 @@ EOF
 }
 
 function licenseFilepathOf() {
-    echo `jq -r .$1.licenseFilepath $ROOT_DIR/meta.json`
+    echo `jq -r .licenseFilepath $ROOT_DIR/meta/$1.json`
 }
 
 function versionOf() {
-    echo `jq -r .$1.version $ROOT_DIR/meta.json`
+    echo `jq -r .version $ROOT_DIR/meta/$1.json`
 }
 
 function folderOf() {
-    echo `jq -r .$1.folder $ROOT_DIR/meta.json`
+    echo `jq -r .folder $ROOT_DIR/meta/$1.json`
 }
 
 function filenameOf() {
-    echo `jq -r .$1.filename $ROOT_DIR/meta.json`
+    echo `jq -r .filename $ROOT_DIR/meta/$1.json`
 }
 
 function typeOf() {
-    echo `jq -r .$1.type $ROOT_DIR/meta.json`
+    echo `jq -r .type $ROOT_DIR/meta/$1.json`
 }
 
 function urlOf() {
-    echo `jq -r .$1.url $ROOT_DIR/meta.json`
+    echo `jq -r .url $ROOT_DIR/meta/$1.json`
+}
+
+function modifyThing() {
+    clr_red "Had to modify $2 on $1."
+    tmp=$(mktemp)  
+    jq ".$2 = \"$3\"" $ROOT_DIR/meta/$1.json > "$tmp"
+    mv "$tmp" $ROOT_DIR/meta/$1.json
 }
 
 function copyLicense() {
-    if [ "`licenseFilepathOf $1`" == "null" ]; then
-        return
+
+    LICENSE_FILEPATH=$(licenseFilepathOf $1)
+    FOLDER=${SOURCES_DIR}/$(folderOf $1)
+    if [ "${LICENSE_FILEPATH}" == "null" ]; then
+
+        if [ -f $FOLDER/LICENSE ]; then
+            LICENSE_FILEPATH=LICENSE
+        elif [ -f $FOLDER/COPYING ]; then
+            LICENSE_FILEPATH=COPYING
+        elif [ -f $FOLDER/LICENSE.md ]; then
+            LICENSE_FILEPATH=LICENSE.md
+        elif [ -f $FOLDER/NOTICE ]; then
+            LICENSE_FILEPATH=NOTICE
+        fi
+        if [ "${LICENSE_FILEPATH}" == "null" ]; then
+            clr_red "Cant find license file for $1... Please fix in meta/$1.json"
+            return
+        else   
+            modifyThing $1 "licenseFilepath" "${LICENSE_FILEPATH}"
+        fi
     fi
     
     if [ ! -f ${OUTPUT_DIR}/licenses/$1 ]; then
-        cp ${SOURCES_DIR}/`folderOf $1`/`licenseFilepathOf $1` ${OUTPUT_DIR}/licenses/$1
+        cp ${FOLDER}/${LICENSE_FILEPATH} ${OUTPUT_DIR}/licenses/$1
     fi
 }
 
 function downloadURL() {
     if [ "$TARBALL_DOWNLOADER" == "aria2c" ]; then
         aria2c $TARBALL_DOWNLOADER_ARGS $1
-        elif [ "$TARBALL_DOWNLOADER" == "curl" ]; then
+    elif [ "$TARBALL_DOWNLOADER" == "curl" ]; then
         curl -L $TARBALL_DOWNLOADER_ARGS $1
     fi
 }

@@ -1,0 +1,8 @@
+{
+  "version": "3.100",
+  "folder": "lame-3.100",
+  "filename": "lame-3.100.tar.gz",
+  "type": "tarball",
+  "url": "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz",
+  "licenseFilepath": "LICENSE"
+}

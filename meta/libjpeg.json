@@ -1,0 +1,8 @@
+{
+  "version": "master",
+  "folder": "libjpeg",
+  "filename": "",
+  "type": "git",
+  "url": "https://github.com/LuaDist/libjpeg",
+  "licenseFilepath": "README"
+}
