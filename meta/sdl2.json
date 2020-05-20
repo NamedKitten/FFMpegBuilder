@@ -1,7 +1,7 @@
 {
-  "version": "2.0.9",
-  "folder": "SDL2-2.0.9",
-  "filename": "SDL2-2.0.9.tar.gz",
+  "version": "2.0.12",
+  "folder": "SDL2-2.0.12",
+  "filename": "SDL2-2.0.12.tar.gz",
   "type": "tarball",
-  "url": "https://libsdl.org/release/SDL2-2.0.9.tar.gz"
+  "url": "https://libsdl.org/release/SDL2-2.0.12.tar.gz"
 }

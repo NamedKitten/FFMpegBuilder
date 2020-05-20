@@ -1,7 +1,7 @@
 {
-  "version": "6.0",
-  "folder": "ncurses-6.0",
-  "filename": "ncurses-6.0.tar.gz",
+  "version": "6.2",
+  "folder": "ncurses-6.2",
+  "filename": "ncurses-6.2.tar.gz",
   "type": "tarball",
-  "url": "https://invisible-mirror.net/archives/ncurses/ncurses-6.0.tar.gz"
+  "url": "https://invisible-mirror.net/archives/ncurses/ncurses-6.2.tar.gz"
 }

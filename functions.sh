@@ -46,16 +46,6 @@ function buildThing() {
     
     clr_blue "Applying patches for $thing"
     case $thing in
-        libxcb )
-            sed s/pthread-stubs// -i configure
-        ;;
-        libX11 )
-            git apply ${ROOT_DIR}/files/x11.diff || true
-            autoreconf -f -i
-        ;;
-        libXt )
-            git apply ${ROOT_DIR}/files/libXt.diff
-        ;;
         zlib )
             cp ${ROOT_DIR}/files/zlib.pc .
         ;;
@@ -69,18 +59,6 @@ function buildThing() {
             cp ${ROOT_DIR}/files/ffmpegthumbnailer-CMakeLists.txt CMakeLists.txt
             cp ${ROOT_DIR}/files/fmt-config.h config.h.in
             rm -rf cmake
-        ;;
-        mesa )
-            echo -e "#ifndef	__dev_t_defined\n#include <sys/types.h>\n#endif\n$(cat src/gallium/winsys/svga/drm/vmw_screen_svga.c)" > src/gallium/winsys/svga/drm/vmw_screen_svga.c
-            echo -e "#ifndef	__dev_t_defined\n#include <sys/types.h>\n#endif\n$(cat src/gallium/winsys/svga/drm/vmw_screen.h)" > src/gallium/winsys/svga/drm/vmw_screen.h
-            
-            #sed "s/shared_library/static_library/" -i src/mesa/drivers/x11/meson.build
-            #sed "s/build_by_default: false/build_by_default: true/" -i src/mesa/drivers/x11/meson.build src/gallium/targets/libgl-xlib/meson.build src/glx/meson.build src/gallium/targets/dri/meson.build
-            #sed "s/elif not with_shared_glapi/elif false/" -i meson.build
-            #sed "s/, libglapi]/]/" -i src/glx/meson.build
-            #sed "s/libglapi,/libglapi_static,/" -i src/gallium/targets/dri/meson.build
-            #sed "s/shared_library/static_library/" -i src/mapi/shared-glapi/meson.build
-            #sed "s/with_shared_glapi = .*/with_shared_glapi = false/" -i meson.build
         ;;
     esac
     
@@ -138,9 +116,6 @@ function buildThing() {
             if [ -f ffprobe ]; then cp ffprobe ${OUTPUT_DIR}/ffprobe; fi
             if [ -f ffplay ]; then cp ffplay ${OUTPUT_DIR}/ffplay; fi
 
-        ;;
-        utillinux )
-            sudo env PATH=$PATH make install |& log $thing install
         ;;
         mpv )
             cp build/mpv  ${OUTPUT_DIR}/mpv

@@ -50,8 +50,8 @@ export AR="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ar"
 export ARCH=`echo ${TARGET_TRIPLE} | sed s/.*-//`
 export CROSS_COMPILE=${TARGET_TRIPLE}-
 
-FFMPEG_CONFIGURE_ARGS="--target-os=linux --arch=${TARGET_ARCH} --enable-cross-compile --cross-prefix=${TARGET_TRIPLE}- --prefix=${SYSROOT} --libdir=${SYSROOT}/lib --enable-static --disable-shared --pkg-config=pkgconf --disable-htmlpages --disable-manpages --disable-doc --disable-optimizations --disable-debug"
-export COMMON_CONFIGURE="--host=${TARGET_TRIPLE} --prefix=${SYSROOT} --disable-shared --enable-static --sysconfdir=/etc --localstatedir=/var xorg_cv_malloc0_returns_null=0"
+FFMPEG_CONFIGURE_ARGS="--target-os=linux --arch=${TARGET_ARCH} --enable-cross-compile --cross-prefix=${TARGET_TRIPLE}- --prefix=${SYSROOT} --libdir=${SYSROOT}/lib --enable-static --disable-shared --pkg-config=pkgconf --disable-htmlpages --disable-manpages --disable-doc --enable-optimizations --disable-debug"
+export COMMON_CONFIGURE="--host=${TARGET_TRIPLE} --prefix=${SYSROOT} --disable-shared --enable-static --sysconfdir=/etc --localstatedir=/var"
 export FUSSY_CONFIGURE="--host=${TARGET_TRIPLE} --prefix=${SYSROOT} --disable-shared --enable-static"
 
 
@@ -79,8 +79,6 @@ if [ $CURRENT_ARCH != "x86_64" ]; then
         echo "no"
         exit
     fi
-
-
 fi
 
 
@@ -231,88 +229,16 @@ if $CONF_LIBPNG; then
     buildThing libpng "${COMMON_CONFIGURE} --disable-shared --enable-static --with-sysroot=${SYSROOT} --with-zlib-prefix=${SYSROOT}"
 fi
 
-
-
-
-
-
-
-if $CONF_XORG; then
-    buildThing xutilmacros  "${COMMON_CONFIGURE}"
-    buildThing xorgproto "${COMMON_CONFIGURE}"
-    buildThing libXau "${COMMON_CONFIGURE}"
-    buildThing libXdmcp "${COMMON_CONFIGURE}"
-    buildThing xcbproto "${COMMON_CONFIGURE}"
-    buildThing libxcb "${COMMON_CONFIGURE}"
-    buildThing freetype "${COMMON_CONFIGURE} --enable-shared=no --enable-static=yes $FREETYPE_CONFIG"
-    buildThing utillinux "${COMMON_CONFIGURE} --enable-shared=no --enable-static=yes --disable-shared"
-    buildThing expat "${COMMON_CONFIGURE} --enable-shared=no --enable-static=yes --disable-shared"
-    CC="$CC -static --static" buildThing fontconfig "${FUSSY_CONFIGURE} --disable-docs --enable-shared=no --enable-static=yes --disable-shared --disable-tests"
-    buildThing fribidi "${COMMON_CONFIGURE} --enable-shared=no --enable-static=yes --disable-shared --enable-static"
-    buildThing xtrans "${COMMON_CONFIGURE}"
-    buildThing libX11 "${COMMON_CONFIGURE} --disable-malloc0returnsnull"
-    buildThing libXext "${COMMON_CONFIGURE}"
-    buildThing libFS "${COMMON_CONFIGURE}"
-    buildThing libICE "${COMMON_CONFIGURE} ICE_LIBS=-lpthread"
-    buildThing libSM "${COMMON_CONFIGURE}"
-    buildThing libXScrnSaver "${COMMON_CONFIGURE}"
-    buildThing libXpm "${COMMON_CONFIGURE}"
-    buildThing libXfixes "${COMMON_CONFIGURE}"
-    buildThing libXrender "${COMMON_CONFIGURE}"
-    buildThing libXcursor "${COMMON_CONFIGURE}"
-    buildThing libXdamage "${COMMON_CONFIGURE}"
-    buildThing libfontenc "${COMMON_CONFIGURE}"
-    buildThing libXfont2 "${COMMON_CONFIGURE} --disable-devel-docs"
-    buildThing libXft "${COMMON_CONFIGURE}"
-    buildThing libXi "${COMMON_CONFIGURE}"
-    buildThing libXinerama "${COMMON_CONFIGURE}"
-    buildThing libXrandr "${COMMON_CONFIGURE}"
-    buildThing libXres "${COMMON_CONFIGURE}"
-    buildThing libXtst "${COMMON_CONFIGURE}"
-    buildThing libXv "${COMMON_CONFIGURE}"
-    buildThing libXvMC "${COMMON_CONFIGURE}"
-    buildThing libXxf86dga "${COMMON_CONFIGURE}"
-    buildThing libXxf86vm "${COMMON_CONFIGURE}"
-    buildThing libdmx "${COMMON_CONFIGURE}"
-    buildThing libpciaccess "${COMMON_CONFIGURE}"
-    buildThing libxkbfile "${COMMON_CONFIGURE}"
-    buildThing libxshmfence "${COMMON_CONFIGURE}"
-    buildThing pixman "--host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --enable-shared=no --disable-shared"
-    buildThing libdrm "${COMMON_CONFIGURE} --disable-docs --enable-shared=no --enable-static=yes --disable-shared"
-fi
-
-
-if $CONF_XORG && $CONF_MESA; then 
-    buildThing mesa "--disable-xa --build=`gcc -dumpmachine`  --target=`gcc -dumpmachine` --host=${TARGET_TRIPLE}  --prefix=${SYSROOT}  --enable-debug  --disable-driglx-direct --enable-shared=no --enable-static=yes --disable-shared --enable-static  --with-platforms=x11,surfaceless,drm   --enable-glx=gallium-xlib --without-gallium-drivers --with-gallium-drivers=swrast --disable-driglx-direct --disable-dri --disable-gbm --disable-egl --disable-libunwind sys_lib_search_path_spec=${SYSROOT}/lib"
-    sed "s/-pthread/-pthread -lglapi -l:libstdc++.a -static-libstdc++ -lz/" -i ${SYSROOT}/lib/pkgconfig/gl.pc
-    MPV_LDFLAGS="${MPV_LDFLAGS} `pkgconf --silence-errors --libs --static gl`"
-else
-    MPV_CONFIGURE_ARGS="$MPV_CONFIGURE_ARGS --disable-gl"
-fi
-
-
 if $CONF_LIBCACA; then
     CPPFLAGS="$CPPFLAGS -P" buildThing ncurses "--host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --enable-shared=no --enable-static=yes --disable-shared --enable-static --with-pc-files"
     buildThing libcaca "--host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --disable-kernel --disable-slang --disable-win32 --disable-conio --disable-x11 --disable-gl --disable-cocoa --disable-network --disable-vga --disable-csharp --disable-java --disable-cxx --disable-python --disable-ruby --disable-imlib2 --disable-profiling --disable-plugins --disable-doc"
     sed "s/-lcaca/-lcaca -lncurses/" -i toolchain/lib/pkgconfig/caca.pc
 fi
 
-
-
-if $CONF_SDL2; then
-    CC="$CC -static --static" buildThing sdl2 "--with-sysroot=${SYSROOT} --host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --disable-pulseaudio --enable-video-x11-xrandr --disable-esd --disable-video-wayland --enable-shared=no --disable-shared --enable-static=yes --enable-static --disable-loadso --disable-sdl-dlopen --disable-video-wayland --disable-video-vulkan --disable-alsa-shared --disable-jack-shared --disable-esd-shared --disable-arts-shared --disable-nas-shared --disable-sndio-shared --disable-wayland-shared --disable-mir-shared --disable-x11-shared --disable-kmsdrm-shared --disable-video-opengl --disable-arts --disable-video-opengles1 --disable-video-opengles2 --disable-video-opengles --disable-ime --enable-events --disable-loadso --enable-video-x11 --x-includes=${SYSROOT}/include/X11 --x-libraries=${SYSROOT}/lib"
-    MPV_CONFIGURE_ARGS="$MPV_CONFIGURE_ARGS --enable-sdl2"
-    FFMPEG_CONFIGURE_ARGS="$FFMPEG_CONFIGURE_ARGS --enable-sdl2"
-
-    sed "s/-lX11/`pkg-config --static --libs xext x11 xfixes xrender xcursor`/"  -i toolchain/lib/pkgconfig/sdl2.pc
-fi
-
 if $CONF_SSL; then
     buildThing libressl "--host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --enable-shared=no --enable-static=yes"
     FFMPEG_CONFIGURE_ARGS="$FFMPEG_CONFIGURE_ARGS --enable-openssl"
 fi
-
-
 
 
 buildThing ffmpeg

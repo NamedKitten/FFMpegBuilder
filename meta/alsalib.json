@@ -1,8 +1,0 @@
-{
-  "version": "1.1.19",
-  "folder": "alsa-lib-1.1.9",
-  "filename": "alsa-lib-1.1.9.tar.bz2",
-  "type": "tarball",
-  "url": "ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.1.9.tar.bz2",
-  "licenseFilepath": "COPYING"
-}

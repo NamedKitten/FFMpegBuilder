@@ -3,11 +3,11 @@ TARGET_ARCH=aarch64
 TARGET_TRIPLE=${TARGET_ARCH}-linux-musl
 
 # Compilation flags
-CFLAGS="-O0 -pipe"
+CFLAGS="-O3 -pipe"
 CXXFLAGS=${CFLAGS}
 LDFLAGS=${CFLAGS}
 
-MAKEFLAGS="-j$(nproc)"
+MAKEFLAGS="-j2"
 
 # Either aria2c or curl
 TARBALL_DOWNLOADER=aria2c
@@ -37,10 +37,7 @@ CONF_SSL=false
 CONF_LUA=false # Needed for youtube-dl support on MPV
 CONF_LIBASS=false # Needed for subtitles and OSD on MPV
 CONF_LIBCACA=false # Terminal output for MPV
-CONF_SDL2=false
-CONF_XORG=false # Needed for xorg video output with MPV
-CONF_MESA=false # Broken ATM, also needs CONF_XORG
-CONF_LIBVA=false
+
 
 # Tools
 CONF_FFMPEG=true 
