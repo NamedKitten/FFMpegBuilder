@@ -80,6 +80,11 @@ function buildThing() {
         ;;
         lua )
         ;;
+        jack1 )
+            git submodule update --init -f
+            autoreconf -i || true
+            ./configure ${configureArgs[@]} |& log $thing configure
+        ;;
         * )
             if [ ! -f configure ]; then
                 autoreconf -i

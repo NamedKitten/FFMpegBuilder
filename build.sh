@@ -50,7 +50,7 @@ export AR="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ar"
 export ARCH=`echo ${TARGET_TRIPLE} | sed s/.*-//`
 export CROSS_COMPILE=${TARGET_TRIPLE}-
 
-FFMPEG_CONFIGURE_ARGS="--target-os=linux --arch=${TARGET_ARCH} --enable-cross-compile --cross-prefix=${TARGET_TRIPLE}- --prefix=${SYSROOT} --libdir=${SYSROOT}/lib --enable-static --disable-shared --pkg-config=pkgconf --disable-htmlpages --disable-manpages --disable-doc --enable-optimizations --disable-debug"
+FFMPEG_CONFIGURE_ARGS="--target-os=linux --arch=${TARGET_ARCH} --enable-cross-compile --cross-prefix=${TARGET_TRIPLE}- --prefix=${SYSROOT} --libdir=${SYSROOT}/lib --enable-static --disable-shared --pkg-config=pkg-config --disable-htmlpages --disable-manpages --disable-doc --enable-optimizations --disable-debug"
 export COMMON_CONFIGURE="--host=${TARGET_TRIPLE} --prefix=${SYSROOT} --disable-shared --enable-static --sysconfdir=/etc --localstatedir=/var"
 export FUSSY_CONFIGURE="--host=${TARGET_TRIPLE} --prefix=${SYSROOT} --disable-shared --enable-static"
 
@@ -72,6 +72,7 @@ CURRENT_ARCH=$(gcc -dumpmachine | sed s/-*//)
 
 TOOLCHAIN_TYPE=cross
 
+set -x
 if [ $CURRENT_ARCH != "x86_64" ]; then
     if [ $TARGET_ARCH != $CURRENT_ARCH ]; then 
         TOOLCHAIN_TYPE=native
@@ -80,6 +81,7 @@ if [ $CURRENT_ARCH != "x86_64" ]; then
         exit
     fi
 fi
+set +x
 
 
 if [ ! -f sources/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz ]; then
@@ -101,6 +103,12 @@ ln -sf ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ranlib ${SYSROOT}/bin/${TARGET_TRIPLE
 ln -sf ${SYSROOT}/bin/strip ${SYSROOT}/bin/${TARGET_TRIPLE}-strip
 mkdir -p ${STATE_DIR}/installed
 mkdir -p ${STATE_DIR}/configured
+
+if [ $TOOLCHAIN_TYPE = "native" ]; then
+if [ ! -f ${SYSROOT}/bin/${TARGET_TRIPLE}-strings ]; then
+ln -sf /usr/bin/strings ${SYSROOT}/bin/${TARGET_TRIPLE}-strings
+fi
+fi
 
 function markInstalled() {
     thing=$1
@@ -214,12 +222,6 @@ if $CONF_ALSA_LIB; then
     buildThing alsalib "${COMMON_CONFIGURE} --disable-shared --enable-static --with-libdl=no"
 fi
 
-# jack audio
-if $CONF_JACK; then
-    buildThing berkeleydb "${COMMON_CONFIGURE} --disable-shared --enable-static"
-    buildThing jack1 "${COMMON_CONFIGURE} --libdir=${SYSROOT}/lib  --enable-force-install --disable-shared --enable-static --disable-tests"
-fi
-
 if $CONF_LIBJPEG; then
     buildThing libjpeg "${COMMON_CONFIGURE} --disable-shared --enable-static"
 fi
@@ -271,7 +273,7 @@ else
 fi
 
 if $CONF_MPV; then
-    MPV_LDFLAGS="$LDFLAGS $MPV_LDFLAGS" PKG_CONFIG="pkgconf --static" buildThing mpv "--enable-static-build --disable-cplugins --target=${TARGET_TRIPLE}  ${MPV_CONFIGURE_ARGS[@]}"
+    MPV_LDFLAGS="$LDFLAGS $MPV_LDFLAGS" PKG_CONFIG="pkg-config --static" buildThing mpv "--enable-static-build --disable-cplugins --target=${TARGET_TRIPLE}  ${MPV_CONFIGURE_ARGS[@]}"
 fi
 
 
