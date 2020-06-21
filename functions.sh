@@ -85,6 +85,11 @@ function buildThing() {
             autoreconf -i || true
             ./configure ${configureArgs[@]} |& log $thing configure
         ;;
+        jq )
+            git submodule update --init -f
+            autoreconf -fi || true
+            ./configure ${configureArgs[@]} |& log $thing configure
+        ;;
         * )
             if [ ! -f configure ]; then
                 autoreconf -i
@@ -124,6 +129,10 @@ function buildThing() {
         ;;
         mpv )
             cp build/mpv  ${OUTPUT_DIR}/mpv
+        ;;
+        jq )
+            strip --strip-all jq
+            cp jq ${OUTPUT_DIR}/jq
         ;;
         ffmpegthumbnailer )
             strip --strip-all ffmpegthumbnailer

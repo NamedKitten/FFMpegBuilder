@@ -41,8 +41,8 @@ export LDFLAGS="$LDFLAGS -L${SYSROOT}/lib"
 export CFLAGS="$CFLAGS -I${SYSROOT}/include"
 export CPPFLAGS="$CFLAGS"
 export CXXFLAGS="$CXXFLAGS"
-export CC="/usr/bin/ccache ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc"
-export CXX="/usr/bin/ccache ${SYSROOT}/bin/${TARGET_TRIPLE}-g++"
+export CC="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc"
+export CXX="${SYSROOT}/bin/${TARGET_TRIPLE}-g++"
 export LD="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc"
 export NM="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-nm"
 export RANLIB="${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ranlib"
@@ -242,9 +242,9 @@ if $CONF_SSL; then
     FFMPEG_CONFIGURE_ARGS="$FFMPEG_CONFIGURE_ARGS --enable-openssl"
 fi
 
-
-buildThing ffmpeg
-
+if $CONF_FFMPEG || $CONF_FFMPEGTHUMBNAILER || $CONF_MPV; then
+    buildThing ffmpeg
+fi
 
 if $CONF_LUA; then
     buildThing lua
@@ -281,6 +281,11 @@ fi
 # FFMpegThumbnailer
 if $CONF_FFMPEGTHUMBNAILER; then
     buildThing ffmpegthumbnailer
+fi
+
+# jq
+if $CONF_JQ; then
+    LDFLAGS="--static $LDFLAGS" buildThing jq "${COMMON_CONFIGURE} --with-oniguruma=builtin --disable-maintainer-mode"
 fi
 
 # Copy readme with license name and information to the output folder.
