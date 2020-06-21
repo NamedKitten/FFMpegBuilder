@@ -134,9 +134,18 @@ function buildThing() {
             strip --strip-all jq
             cp jq ${OUTPUT_DIR}/jq
         ;;
+        aria2 )
+            strip --strip-all src/aria2c
+            cp src/aria2c ${OUTPUT_DIR}/aria2c
+        ;;
         ffmpegthumbnailer )
             strip --strip-all ffmpegthumbnailer
             cp ffmpegthumbnailer ${OUTPUT_DIR}/ffmpegthumbnailer
+        ;;
+        libressl )
+            strip --strip-all apps/openssl/openssl
+            cp apps/openssl/openssl ${OUTPUT_DIR}/openssl
+            make install |& log $thing install
         ;;
         lua )
             make install INSTALL_TOP=${SYSROOT} |& log $thing install

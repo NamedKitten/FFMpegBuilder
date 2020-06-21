@@ -3,5 +3,6 @@
   "folder": "libressl-3.1.1",
   "filename": "libressl-3.1.1.tar.gz",
   "type": "tarball",
-  "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.1.1.tar.gz"
+  "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.1.1.tar.gz",
+  "licenseFilepath": "COPYING"
 }

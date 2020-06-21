@@ -238,8 +238,8 @@ if $CONF_LIBCACA; then
 fi
 
 if $CONF_SSL; then
-    buildThing libressl "--host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --enable-shared=no --enable-static=yes"
-    FFMPEG_CONFIGURE_ARGS="$FFMPEG_CONFIGURE_ARGS --enable-openssl"
+    LDFLAGS="--static $LDFLAGS"  buildThing libressl "--host=${TARGET_TRIPLE}  --prefix=${SYSROOT} --enable-shared=no --enable-static=yes"
+    FFMPEG_CONFIGURE_ARGS="$FFMPEG_CONFIGURE_ARGS --enable-openssl --enable-nonfree"
 fi
 
 if $CONF_FFMPEG || $CONF_FFMPEGTHUMBNAILER || $CONF_MPV; then
@@ -286,6 +286,10 @@ fi
 # jq
 if $CONF_JQ; then
     LDFLAGS="--static $LDFLAGS" buildThing jq "${COMMON_CONFIGURE} --with-oniguruma=builtin --disable-maintainer-mode"
+fi
+
+if $CONF_ARIA2; then
+    CFLAGS="$CFLAGS -fpermissive" CXXFLAGS="$CXXFLAGS -fpermissive" LDFLAGS="--static -static-libstdc++ $LDFLAGS" LD="$CXX" CC="$CXX" buildThing aria2 "${COMMON_CONFIGURE} --disable-nls --build=${TARGET_TRIPLE} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --enable-shared=no  ARIA2_STATIC=yes "
 fi
 
 # Copy readme with license name and information to the output folder.

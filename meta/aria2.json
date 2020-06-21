@@ -1,0 +1,8 @@
+{
+  "version": "master",
+  "folder": "aria2-1.35.0",
+  "filename": "aria2-1.35.0.tar.xz",
+  "type": "tarball",
+  "url": "https://github.com/aria2/aria2/releases/download/release-1.35.0/aria2-1.35.0.tar.xz",
+  "licenseFilepath": "COPYING"
+}
