@@ -3,7 +3,7 @@ TARGET_ARCH=x86_64
 TARGET_TRIPLE=${TARGET_ARCH}-linux-musl
 
 # Compilation flags
-CFLAGS="-O3 -march=native -pipe -flto -fno-plt -fdevirtualize-at-ltrans"
+CFLAGS="-O2"
 CXXFLAGS=${CFLAGS}
 LDFLAGS="${CFLAGS}"
 
