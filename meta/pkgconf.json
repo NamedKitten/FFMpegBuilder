@@ -1,8 +1,8 @@
 {
-  "version": "1.6.3",
-  "folder": "pkgconf-1.6.3",
-  "filename": "pkgconf-1.6.3.tar.xz",
+  "version": "1.7.3",
+  "folder": "pkgconf-1.7.3",
+  "filename": "pkgconf-1.7.3.tar.xz",
   "type": "tarball",
-  "url": "https://distfiles.dereferenced.org/pkgconf/pkgconf-1.6.3.tar.xz",
+  "url": "https://distfiles.dereferenced.org/pkgconf/pkgconf-1.7.3.tar.xz",
   "licenseFilepath": "COPYING"
 }

@@ -104,6 +104,7 @@ function buildThing() {
     case $thing in
         lua )
             make $MAKEFLAGS V=1 generic CC=${TARGET_TRIPLE}-gcc AR="${TARGET_TRIPLE}-gcc-ar rcu" RANLIB=${TARGET_TRIPLE}-ranlib  |& log $thing build
+            fix_lua_pkgconf
         ;;
         mpv )
             if [ ! -f ${SYSROOT}/lib/libc.so ]; then
@@ -173,6 +174,22 @@ function buildThing() {
     
     cd $ROOT_DIR
     trap - HUP INT TERM PIPE EXIT
+}
+
+function fix_lua_pkgconf() {
+    cat <<boop > ${SYSROOT}/lib/pkgconfig/lua.pc
+prefix=${SYSROOT}
+exec_prefix=${SYSROOT}
+libdir=${SYSROOT}/lib
+includedir=${SYSROOT}/include
+
+Name: Lua
+Description: An Extensible Extension Language
+Version: `versionOf lua`
+Requires:
+Libs: -L${libdir} -llua -lm
+Cflags: -I${includedir}
+boop
 }
 
 
@@ -323,4 +340,30 @@ function dlThing() {
         git clone --depth=1 -b $version $url $folder
     fi
     cd $ROOT_DIR
+}
+
+function markInstalled() {
+    thing=$1
+    touch ${STATE_DIR}/installed/$thing
+}
+
+function isInstalled() {
+    thing=$1
+    [ -f "${STATE_DIR}/installed/${thing}" ]
+}
+
+
+function markConfigured() {
+    thing=$1
+    touch ${STATE_DIR}/configured/$thing
+}
+
+function unmarkConfigured() {
+    thing=$1
+    rm -f ${STATE_DIR}/configured/$thing
+}
+
+function isConfigured() {
+    thing=$1
+    [ -f "${STATE_DIR}/configured/${thing}" ]
 }

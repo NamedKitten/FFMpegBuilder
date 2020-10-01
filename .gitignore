@@ -6,3 +6,4 @@ logs/*
 *.log
 .log
 state
+.config.sh

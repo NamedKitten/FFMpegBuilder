@@ -5,7 +5,7 @@ set -o pipefail
 
 # For coloured text.
 source bash_colors.sh
-#set -x
+set -x
 
 HOST_ARCH=`uname -p`
 NON_FREE=false
@@ -34,7 +34,12 @@ export SYSROOT=${ROOT_DIR}/toolchain
 export OLDPATH=$PATH
 export PATH=${SYSROOT}/bin:$PATH
 
-source config.sh
+if [ ! -f ".config.sh" ]; then
+clr_red "Please edit example-config.sh and place it at .config.sh"
+exit
+fi
+
+source .config.sh
 source functions.sh
 
 export LDFLAGS="$LDFLAGS -L${SYSROOT}/lib"
@@ -72,7 +77,6 @@ CURRENT_ARCH=$(gcc -dumpmachine | sed s/-*//)
 
 TOOLCHAIN_TYPE=cross
 
-set -x
 if [ $CURRENT_ARCH != "x86_64" ]; then
     if [ $TARGET_ARCH != $CURRENT_ARCH ]; then 
         TOOLCHAIN_TYPE=native
@@ -81,7 +85,6 @@ if [ $CURRENT_ARCH != "x86_64" ]; then
         exit
     fi
 fi
-set +x
 
 
 if [ ! -f sources/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz ]; then
@@ -94,7 +97,7 @@ fi
 if [ ! -d toolchain ]; then
     clr_brown "Extracting toolchain"
     mkdir toolchain
-    tar xf "sources/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz" -C toolchain/ --strip-components=2  &>/dev/null
+    tar xf "sources/${TARGET_TRIPLE}-${TOOLCHAIN_TYPE}.tgz" -C toolchain/ --strip-components=1 &>/dev/null || true
 fi
 
 ln -sf ${SYSROOT}/bin/${TARGET_TRIPLE}-gcc-ar ${SYSROOT}/bin/${TARGET_TRIPLE}-ar
@@ -110,31 +113,10 @@ ln -sf /usr/bin/strings ${SYSROOT}/bin/${TARGET_TRIPLE}-strings
 fi
 fi
 
-function markInstalled() {
-    thing=$1
-    touch ${STATE_DIR}/installed/$thing
-}
-
-function isInstalled() {
-    thing=$1
-    [ -f "${STATE_DIR}/installed/${thing}" ]
-}
-
-
-function markConfigured() {
-    thing=$1
-    touch ${STATE_DIR}/configured/$thing
-}
-
-function unmarkConfigured() {
-    thing=$1
-    rm -f ${STATE_DIR}/configured/$thing
-}
-
-function isConfigured() {
-    thing=$1
-    [ -f "${STATE_DIR}/configured/${thing}" ]
-}
+if which ccache 2>&1 >/dev/null; then
+    CC="ccache ${CC}"
+    CXX="ccache ${CXX}"
+fi
 
 
 CC="$HOST_CC" CXX="$HOST_CXX" LD="$HOST_LD" AR=$HOST_AR RANLIB=$HOST_RANLIB PATH=$OLDPATH LDFLAGS="" CFLAGS="" CXXFLAGS="" CPPFLAGS="" buildThing pkgconf "--prefix=${SYSROOT} --enable-static --disable-shared"
@@ -248,21 +230,6 @@ fi
 
 if $CONF_LUA; then
     buildThing lua
-    
-cat <<boop > ${SYSROOT}/lib/pkgconfig/lua.pc
-prefix=${SYSROOT}
-exec_prefix=${SYSROOT}
-libdir=${SYSROOT}/lib
-includedir=${SYSROOT}/include
-
-Name: Lua
-Description: An Extensible Extension Language
-Version: `versionOf lua`
-Requires:
-Libs: -L${libdir} -llua -lm
-Cflags: -I${includedir}
-boop
-    
     MPV_CONFIGURE_ARGS="$MPV_CONFIGURE_ARGS --lua=52"
 fi
 
@@ -276,29 +243,14 @@ if $CONF_MPV; then
     MPV_LDFLAGS="$LDFLAGS $MPV_LDFLAGS" PKG_CONFIG="pkg-config --static" buildThing mpv "--enable-static-build --disable-cplugins --target=${TARGET_TRIPLE}  ${MPV_CONFIGURE_ARGS[@]}"
 fi
 
-
-
-# FFMpegThumbnailer
 if $CONF_FFMPEGTHUMBNAILER; then
     buildThing ffmpegthumbnailer
 fi
 
-# jq
 if $CONF_JQ; then
     LDFLAGS="--static $LDFLAGS" buildThing jq "${COMMON_CONFIGURE} --with-oniguruma=builtin --disable-maintainer-mode"
 fi
 
 if $CONF_ARIA2; then
-    CFLAGS="$CFLAGS -fpermissive" CXXFLAGS="$CXXFLAGS -fpermissive" LDFLAGS="--static -static-libstdc++ $LDFLAGS" LD="$CXX" CC="$CXX" buildThing aria2 "${COMMON_CONFIGURE} --disable-nls --build=${TARGET_TRIPLE} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --enable-shared=no  ARIA2_STATIC=yes "
+    PKG_CONFIG_LIBDIR="${SYSROOT}/lib/pkgconfig" CFLAGS="$CFLAGS -fpermissive" CXXFLAGS="$CXXFLAGS -fpermissive" LDFLAGS="--static -static-libstdc++ $LDFLAGS" LD="$CXX" CC="$CXX" buildThing aria2 "${COMMON_CONFIGURE} --disable-nls --build=${TARGET_TRIPLE} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --enable-shared=no --without-libcares --without-libgcrypt --without-libnettle --without-libgmp --without-openssl --without-sqlite3 --without-libxml2 --disable-ssl  ARIA2_STATIC=yes "
 fi
-
-# Copy readme with license name and information to the output folder.
-cp ${ROOT_DIR}/README.out ${OUTPUT_DIR}/README
-sed -i "s/LICENSE_NAME/${LICENSE}/" ${OUTPUT_DIR}/README
-
-if $NON_FREE; then
-    sed -i "s/^IF_NONFREE //" ${OUTPUT_DIR}/README
-else
-    sed -i "s/^IF_NONFREE.*//" ${OUTPUT_DIR}/README
-fi
-
